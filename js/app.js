@@ -63,7 +63,14 @@ function boot() {
 const isNarrow = () => matchMedia('(max-width: 860px)').matches;
 
 function revealResults() {
-  if (isNarrow()) setTimeout(() => $('#results').scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+  if (!isNarrow()) return;
+  setTimeout(() => {
+    const target = $('#results');
+    const before = scrollY;
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Certains navigateurs ignorent le défilement animé : on y va directement
+    setTimeout(() => { if (scrollY === before) target.scrollIntoView({ block: 'start' }); }, 450);
+  }, 60);
 }
 
 function bindResultsShortcut() {
