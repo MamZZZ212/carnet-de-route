@@ -35,8 +35,7 @@ function flightPriceFor(km) {
 
 function flightDuration(km) {
   const hours = km / 780 + 0.6 + (km > 7000 ? 1 : 0);
-  const h = Math.floor(hours), m = Math.round(((hours - h) * 60) / 5) * 5;
-  return `~${h} h ${m ? pad2(m) : ''}${km > 7000 ? ' (souvent 1 escale)' : ''}`.trim();
+  return `~${fmtDuration(hours * 60)}${km > 7000 ? ' (souvent 1 escale)' : ''}`;
 }
 
 // Note de confort climatique d'un mois : autour de 24 °C l'après-midi, peu de jours de pluie

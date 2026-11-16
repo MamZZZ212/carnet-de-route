@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=8">
+  <link rel="stylesheet" href="styles.css?v=10">
 </head>
 <body>
   <header class="topbar">
@@ -46,6 +46,10 @@
             </div>
             <label class="field" id="zoneField" hidden><span>Zone géographique (pour l’estimation)</span><select id="f-zone"></select></label>
             <p class="hint" id="destHint"></p>
+            <div class="field" id="transportField" hidden><span>Comment y aller ?</span>
+              <div class="transport-choice" id="transportChoice"></div>
+              <p class="hint" id="transportHint"></p>
+            </div>
           </div>
 
           <div class="fgroup">
@@ -114,7 +118,7 @@
           <label class="field"><span>Budget / personne</span><input type="number" id="i-budget" min="0" step="100" placeholder="ex. 1500"></label>
           <label class="field"><span>Standing</span><select id="i-standing"></select></label>
           <label class="field"><span>Distance</span><select id="i-region">
-            <option value="all">Peu importe</option><option value="court">Moyen-courrier</option><option value="long">Long-courrier</option>
+            <option value="all">Peu importe</option><option value="court">Moyen-courrier</option><option value="long">Long-courrier</option><option value="train">En train (moins de 4 h)</option>
           </select></label>
         </div>
         <div class="chips" id="i-envies"></div>
@@ -142,26 +146,28 @@
   <div class="toast" id="toast" role="status"></div>
   <button class="fab" id="toResults" hidden>Voir mon voyage ↓</button>
 
-  <script src="data.js?v=8"></script>
-  <script src="geo-reference.js?v=8"></script>
-  <script src="airports.js?v=8"></script>
-  <script src="js/text-format.js?v=8"></script>
-  <script src="js/calendar.js?v=8"></script>
-  <script src="js/budget-estimator.js?v=8"></script>
-  <script src="js/world-profile.js?v=8"></script>
-  <script src="js/listing-parser.js?v=8"></script>
-  <script src="js/place-insights.js?v=8"></script>
-  <script src="js/destination-resolver.js?v=8"></script>
-  <script src="js/budget-advisor.js?v=8"></script>
-  <script src="js/booking-links.js?v=8"></script>
-  <script src="js/itinerary-planner.js?v=8"></script>
-  <script src="js/trip-store.js?v=8"></script>
-  <script src="js/planner-form.js?v=8"></script>
-  <script src="js/place-search.js?v=8"></script>
-  <script src="js/planner-results.js?v=8"></script>
-  <script src="js/itinerary-view.js?v=8"></script>
-  <script src="js/inspiration-view.js?v=8"></script>
-  <script src="js/trips-view.js?v=8"></script>
-  <script src="js/app.js?v=8"></script>
+  <script src="data.js?v=10"></script>
+  <script src="geo-reference.js?v=10"></script>
+  <script src="airports.js?v=10"></script>
+  <script src="js/text-format.js?v=10"></script>
+  <script src="js/calendar.js?v=10"></script>
+  <script src="js/budget-estimator.js?v=10"></script>
+  <script src="rail-network.js?v=10"></script>
+  <script src="js/world-profile.js?v=10"></script>
+  <script src="js/transport-options.js?v=10"></script>
+  <script src="js/listing-parser.js?v=10"></script>
+  <script src="js/place-insights.js?v=10"></script>
+  <script src="js/destination-resolver.js?v=10"></script>
+  <script src="js/budget-advisor.js?v=10"></script>
+  <script src="js/booking-links.js?v=10"></script>
+  <script src="js/itinerary-planner.js?v=10"></script>
+  <script src="js/trip-store.js?v=10"></script>
+  <script src="js/planner-form.js?v=10"></script>
+  <script src="js/place-search.js?v=10"></script>
+  <script src="js/planner-results.js?v=10"></script>
+  <script src="js/itinerary-view.js?v=10"></script>
+  <script src="js/inspiration-view.js?v=10"></script>
+  <script src="js/trips-view.js?v=10"></script>
+  <script src="js/app.js?v=10"></script>
 </body>
 </html>

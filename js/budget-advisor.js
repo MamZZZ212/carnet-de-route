@@ -11,8 +11,12 @@ function budgetAdvice(form, profile, dest, est, months) {
   const month = fromISO(form.start).getMonth() + 1;
   const place = dest ? dest.name : form.dest;
 
-  if (est.lead < 30) {
-    tips.push('Départ proche : les prix des vols grimpent dans les dernières semaines, réservez sans tarder.');
+  const train = est.travel.options.train;
+  if (train && est.travel.mode !== 'train') {
+    tips.push(`En train, c’est ${fmtDuration(train.minutes)} jusqu’à ${train.station} : choisissez « Train » dans « Comment y aller ? » pour comparer.`);
+  }
+  if (est.lead < 30 && est.travel.mode !== 'car') {
+    tips.push(`Départ proche : les prix des ${est.travel.mode === 'train' ? 'billets de train' : 'vols'} grimpent dans les dernières semaines, réservez sans tarder.`);
   } else if (est.longHaul && est.lead > 60) {
     tips.push('Long-courrier : c’est généralement 2 à 5 mois avant le départ qu’on trouve les meilleurs tarifs.');
   }

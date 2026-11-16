@@ -25,7 +25,7 @@ const DEFAULT_CHECKLIST = [
 function defaultForm() {
   const start = addDays(today(), 30);
   return {
-    origin: 'PAR', dest: '', place: null, zone: 'eu_ouest', start: toISO(start), end: toISO(addDays(start, 7)),
+    origin: 'PAR', dest: '', place: null, transport: '', transportFor: '', zone: 'eu_ouest', start: toISO(start), end: toISO(addDays(start, 7)),
     adults: 2, children: 0, standing: 'confort', cabin: 'auto', envies: [], rhythm: 'equilibre', budget: '',
   };
 }

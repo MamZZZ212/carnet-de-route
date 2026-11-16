@@ -62,10 +62,12 @@ function estimate(form, profile, opts = {}) {
   const rooms = roomsFor(adults, children);
   const eaters = adults + 0.6 * children;
 
+  const season = seasonOf(profile, start.getMonth() + 1);
   const flight = flightCost(form, profile, start, opts.ignoreLead);
+  const travel = travelFor(form, profile, season, flight);
   const lodging = lodgingCost(profile, standing, start, nights, rooms);
   const parts = {
-    flights: flight.total,
+    flights: travel.total, // trajet aller-retour : avion, train ou voiture
     lodging: lodging.total,
     food: profile.repas * standing.food * nights * eaters,
     transport: profile.trans * standing.trans * nights * (adults + 0.5 * children),
@@ -80,9 +82,9 @@ function estimate(form, profile, opts = {}) {
     perPerson: total / (adults + children),
     perDay: total / (nights + 1),
     lodgePerNight: lodging.perNight,
-    season: seasonOf(profile, start.getMonth() + 1),
+    season, travel,
     lead: flight.lead,
-    longHaul: profile.vol >= LONG_HAUL_FROM,
+    longHaul: travel.mode === 'plane' && profile.vol >= LONG_HAUL_FROM,
   };
 }
 

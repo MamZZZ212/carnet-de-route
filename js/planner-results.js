@@ -31,11 +31,11 @@ function heroCard(f, dest, est) {
     ['Dates', fmtRange(f.start, f.end)],
     ['Durée', `${plural(est.nights, 'nuit', 'nuits')} · ${plural(est.nights + 1, 'jour', 'jours')}`],
     ['Voyageurs', travellers],
-    ['Standing', `${STANDINGS[f.standing].label} · vol ${CABINS[cabinOf(f)].label.toLowerCase()}`],
+    ['Standing', est.travel.mode === 'plane' ? `${STANDINGS[f.standing].label} · vol ${CABINS[cabinOf(f)].label.toLowerCase()}` : STANDINGS[f.standing].label],
     ['Période', `<span class="pill ${est.season}">${SEASON_FACTORS[est.season].label}</span>`],
   ];
-  if (dest) facts.push(['Vol', dest.flight]);
-  if (dest && dest.world && dest.airport) facts.push(['Aéroport', `${dest.airport.iata} · ${dest.airport.city} (${dest.airport.km} km)`]);
+  if (dest) facts.push(['Trajet', travelSummary(est.travel)]);
+  if (dest && dest.world && dest.airport && est.travel.mode === 'plane') facts.push(['Aéroport', `${dest.airport.iata} · ${dest.airport.city} (${dest.airport.km} km)`]);
   const formalities = dest ? `<p class="formalities">🛂 <b>Formalités :</b> ${esc(dest.form)} — <a href="https://www.diplomatie.gouv.fr/fr/conseils-aux-voyageurs/" target="_blank" rel="noopener">à vérifier avant le départ</a></p>` : '';
   const loading = dest && dest.loading ? '<span class="pill mid"><span class="spinner"></span>Recherche d’infos sur ce lieu…</span>' : '';
   return `<div class="card hero${dest && dest.image ? ' has-image' : ''}">
@@ -78,7 +78,7 @@ function budgetGauge(total, budget) {
 
 function partNote(key, f, est) {
   const n = est.nights;
-  if (key === 'flights') return `${CABINS[cabinOf(f)].label} aller-retour${est.lead < 30 ? ' · départ proche, prix majorés' : ''}`;
+  if (key === 'flights') return travelNote(f, est.travel, est.lead);
   if (key === 'lodging') return `${plural(est.rooms, 'chambre', 'chambres')} × ${plural(n, 'nuit', 'nuits')} · ~${money(est.lodgePerNight, 5)} / nuit`;
   if (key === 'food') return `~${money(est.parts.food / n, 5)} par jour pour le groupe`;
   if (key === 'misc') return 'Assurance, pourboires, petites dépenses';
@@ -87,7 +87,7 @@ function partNote(key, f, est) {
 
 function budgetCard(f, profile, dest, est, months) {
   const rows = BUDGET_PARTS.map(([k, label, color]) => `<li class="bd-row">
-      <span class="bd-label"><i class="dot" style="background:${color}"></i>${label}</span><b>${money(est.parts[k])}</b>
+      <span class="bd-label"><i class="dot" style="background:${color}"></i>${k === 'flights' ? TRANSPORT_LABELS[est.travel.mode] : label}</span><b>${money(est.parts[k])}</b>
       <span class="bd-bar"><i style="width:${(est.parts[k] / est.total) * 100}%;background:${color}"></i></span>
       <small>${partNote(k, f, est)}</small></li>`).join('');
   const tips = budgetAdvice(f, profile, dest, est, months);
@@ -135,7 +135,7 @@ function bookingCard(f, dest, est) {
     </div></div>`).join('');
   return `<div class="card">
     <div class="card-h"><h2>Réserver</h2><span class="muted">recherches déjà remplies avec vos dates</span></div>
-    <p class="target">Budget hébergement visé : <b>~${money(est.lodgePerNight, 5)} / nuit</b> par chambre · vols : <b>~${money(est.parts.flights / (+f.adults + +f.children), 5)} / personne</b></p>
+    <p class="target">Budget hébergement visé : <b>~${money(est.lodgePerNight, 5)} / nuit</b> par chambre · ${TRANSPORT_LABELS[est.travel.mode].toLowerCase()} : <b>~${money(est.parts.flights / (+f.adults + +f.children), 5)} / personne</b> aller-retour</p>
     <div class="book-groups">${groups}</div>
   </div>`;
 }

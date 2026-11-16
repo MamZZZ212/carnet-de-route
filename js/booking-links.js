@@ -41,8 +41,38 @@ function flightLinks(c, dest) {
     name: 'Kayak', sub: 'Compare les agences',
     url: `https://www.kayak.fr/flights/${c.origin.id}-${dest.iata}/${c.start}/${c.end}${kayakCabin}/${c.adults}adults${kayakKids}?sort=bestflight_a`,
   });
-  if (dest.train) links.push({ name: 'Trainline', sub: 'Y aller en train', url: 'https://www.thetrainline.com/fr' });
   return links;
+}
+
+function trainLinks(c, train) {
+  const route = `${c.origin.name} → ${train.station}`;
+  const links = [
+    { name: 'SNCF Connect', sub: route, url: 'https://www.sncf-connect.com/' },
+    { name: 'Trainline', sub: 'Compare toutes les compagnies', url: 'https://www.thetrainline.com/fr' },
+  ];
+  if (train.eurostar) links.unshift({ name: 'Eurostar', sub: route, url: 'https://www.eurostar.com/fr-fr' });
+  if (train.operators.some(op => op.includes('Lyria'))) links.unshift({ name: 'TGV Lyria', sub: route, url: 'https://www.tgv-lyria.com/fr/fr' });
+  return links;
+}
+
+function carLinks(c, dest, car) {
+  const [lat, lon] = coordsOf(dest);
+  return [
+    { name: 'Google Maps', sub: `Itinéraire · ${car.km} km`, url: `https://www.google.com/maps/dir/?api=1&origin=${enc(c.origin.name)}&destination=${lat},${lon}&travelmode=driving` },
+    { name: 'BlaBlaCar', sub: 'Covoiturage', url: `https://www.blablacar.fr/search?fn=${enc(c.origin.name)}&tn=${enc(c.city)}&db=${c.start}&seats=${Math.min(4, c.adults + c.children)}` },
+    { name: 'ViaMichelin', sub: 'Coût des péages et du carburant', url: 'https://www.viamichelin.fr/itineraires' },
+  ];
+}
+
+// Groupes de liens pour se rendre sur place : le moyen choisi d'abord
+function travelGroups(c, dest, travel) {
+  const { options, mode } = travel;
+  const groups = {
+    train: options.train && { title: 'Train', icon: TRANSPORT_ICONS.train, links: trainLinks(c, options.train) },
+    plane: options.plane && { title: 'Vols', icon: TRANSPORT_ICONS.plane, links: flightLinks(c, dest) },
+    car: options.car && dest && { title: 'Voiture', icon: TRANSPORT_ICONS.car, links: carLinks(c, dest, options.car) },
+  };
+  return [mode, ...['train', 'plane', 'car'].filter(m => m !== mode)].map(m => groups[m]).filter(Boolean);
 }
 
 function lodgingLinks(c, form, est) {
@@ -80,7 +110,7 @@ function onSiteLinks(c) {
 function bookingGroups(form, dest, est) {
   const c = tripContext(form, dest);
   return [
-    { title: 'Vols', icon: '✈', links: flightLinks(c, dest) },
+    ...travelGroups(c, dest, est.travel),
     { title: 'Hébergement', icon: '⌂', links: lodgingLinks(c, form, est) },
     { title: 'Sur place', icon: '◎', links: onSiteLinks(c) },
   ];

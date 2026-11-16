@@ -28,7 +28,7 @@ function scoreDestination(dest) {
   const budget = +inspi.budget;
   const ratio = budget ? perPerson / budget : 0;
   const budgetPart = !budget ? 15 : ratio <= 1 ? 25 : Math.max(0, 25 - (ratio - 1) * 60);
-  return { dest, trip, perPerson, matched, season, score: Math.round(envyPart + weatherPart + budgetPart), overBudget: ratio > 1 };
+  return { dest, trip, perPerson, matched, season, travel: est.travel, score: Math.round(envyPart + weatherPart + budgetPart), overBudget: ratio > 1 };
 }
 
 function inspiCard(r) {
@@ -41,20 +41,25 @@ function inspiCard(r) {
     <p>${esc(d.desc)}</p>
     <div class="dest-meta"><span class="pill ${r.season}">${SEASON_FACTORS[r.season].label}</span>${weather}${pills}</div>
     <div class="trip-row"><span class="dest-price">${money(r.perPerson)} <small>/ pers.</small></span>
-      <span>${r.overBudget ? '<b style="color:var(--bad)">au-dessus du budget</b>' : `vol ${esc(d.flight)}`}</span></div>
+      <span>${r.overBudget ? '<b style="color:var(--bad)">au-dessus du budget</b>' : esc(travelSummary(r.travel))}</span></div>
     <button class="btn primary small" data-plan="${esc(d.id)}">Planifier ce voyage →</button>
   </article>`;
 }
 
 function renderInspiration() {
+  const byDistance = d => inspi.region === 'all' || inspi.region === 'train' || (inspi.region === 'long') === (d.vol >= LONG_HAUL_FROM);
   const results = DESTS
-    .filter(d => inspi.region === 'all' || (inspi.region === 'long') === (d.vol >= LONG_HAUL_FROM))
+    .filter(byDistance)
     .map(scoreDestination)
+    .filter(r => inspi.region !== 'train' || r.travel.options.train)
     .sort((a, b) => b.score - a.score)
     .slice(0, 12);
   $('#i-envies').innerHTML = envyChips(inspi.envies);
-  $('#inspiResults').innerHTML = results.map(inspiCard).join('')
-    || '<div class="card empty-trips"><p class="muted">Aucune destination ne correspond à ces critères.</p></div>';
+  const hint = inspi.region === 'train'
+    ? '<p class="muted">Pour d’autres villes à moins de 4 h de train (Bruxelles, Lyon, Bordeaux, Genève…), tapez-les dans « Planifier ».</p>' : '';
+  $('#inspiResults').innerHTML = (results.map(inspiCard).join('')
+    || '<div class="card empty-trips"><p class="muted">Aucune destination ne correspond à ces critères.</p></div>')
+    + (hint && `<div class="card empty-trips">${hint}</div>`);
 }
 
 function updateInspi(patch) {

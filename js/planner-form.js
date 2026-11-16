@@ -41,9 +41,29 @@ function destHintText(dest) {
   return where + airport;
 }
 
+function transportButton(mode, option, chosen) {
+  const detail = !option ? 'non proposé'
+    : mode === 'plane' ? (option.label || 'vol') : `${mode === 'car' ? '~' : ''}${fmtDuration(option.minutes)}`;
+  return `<button type="button" class="transport${mode === chosen ? ' on' : ''}" data-mode="${mode}"${option ? '' : ' disabled'}>
+    <b>${TRANSPORT_ICONS[mode]} ${mode === 'plane' ? 'Avion' : TRANSPORT_LABELS[mode]}</b><span>${esc(detail)}</span></button>`;
+}
+
+function syncTransportChoice(dest) {
+  $('#transportField').hidden = !dest;
+  if (!dest) return;
+  const options = travelOptions(state.form, profileFor(state.form, dest));
+  $('#transportChoice').innerHTML = ['train', 'plane', 'car'].map(m => transportButton(m, options[m], options.chosen)).join('');
+  const train = options.train;
+  const nearby = options.car || !options.plane;
+  $('#transportHint').textContent = !train ? (nearby ? 'Pas de trajet en train de moins de 4 h vers cette destination.' : '')
+    : train.minutes <= TRAIN_PREFERRED_MIN ? `Train conseillé : ${train.direct ? 'direct, ' : ''}de centre-ville à centre-ville, sans attente à l’aéroport.`
+      : 'Train possible (entre 3 h 30 et 4 h).';
+}
+
 function syncDestHint() {
   const f = state.form;
   const dest = resolveDest(f);
+  syncTransportChoice(dest);
   const unknown = Boolean(f.dest.trim()) && !dest;
   const approximate = unknown && (search.failed || search.approx === normText(f.dest));
   $('#zoneField').hidden = !approximate;
@@ -103,6 +123,10 @@ function bindPlannerForm() {
   $('#standings').addEventListener('click', e => {
     const k = e.target.closest('.standing')?.dataset.standing;
     if (k) updateForm({ standing: k });
+  });
+  $('#transportChoice').addEventListener('click', e => {
+    const mode = e.target.closest('.transport:not([disabled])')?.dataset.mode;
+    if (mode) updateForm({ transport: mode, transportFor: normText(state.form.dest) });
   });
   $('#rhythm').addEventListener('click', e => {
     const v = e.target.closest('button')?.dataset.v;
