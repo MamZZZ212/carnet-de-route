@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Carnet de route</title>
+  <meta name="description" content="Organise tes voyages : budget, réservations et programme jour par jour.">
+  <meta name="theme-color" content="#0d6a61">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Carnet">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=7">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">✈</span>Carnet de route</div>
+    <nav class="tabs" aria-label="Sections">
+      <button class="tab" data-tab="plan">Planifier</button>
+      <button class="tab" data-tab="inspi">Inspiration</button>
+      <button class="tab" data-tab="trips">Mes voyages <span class="count" id="tripCount"></span></button>
+    </nav>
+    <button class="icon-btn" id="themeBtn" title="Thème clair / sombre" aria-label="Changer de thème">◐</button>
+  </header>
+
+  <main>
+    <!-- PLANIFIER -->
+    <section class="view" id="view-plan">
+      <div class="planner">
+        <aside class="panel form-panel" id="planForm">
+          <div class="fgroup">
+            <h3>Où ?</h3>
+            <label class="field"><span>Départ de</span><select id="f-origin"></select></label>
+            <div class="field"><label for="f-dest">Destination <small>n’importe où dans le monde</small></label>
+              <div class="search">
+                <input id="f-dest" placeholder="Ville, île, pays… ex. Kyoto, Zanzibar" autocomplete="off" role="combobox" aria-controls="destSuggest" aria-autocomplete="list">
+                <button type="button" class="btn primary search-btn" id="searchBtn">Rechercher</button>
+                <ul class="suggest" id="destSuggest" role="listbox" hidden></ul>
+              </div>
+            </div>
+            <label class="field" id="zoneField" hidden><span>Zone géographique (pour l’estimation)</span><select id="f-zone"></select></label>
+            <p class="hint" id="destHint"></p>
+          </div>
+
+          <div class="fgroup">
+            <h3>Quand ?</h3>
+            <div class="row2">
+              <label class="field"><span>Aller</span><input type="date" id="f-start"></label>
+              <label class="field"><span>Retour</span><input type="date" id="f-end"></label>
+            </div>
+            <div class="quick" id="quickNights">
+              <button data-n="2">Week-end</button><button data-n="4">4 nuits</button><button data-n="7">1 semaine</button>
+              <button data-n="10">10 nuits</button><button data-n="14">2 semaines</button>
+            </div>
+            <p class="duration" id="durInfo"></p>
+          </div>
+
+          <div class="fgroup">
+            <h3>Qui ?</h3>
+            <div class="stepper-row"><span>Adultes</span>
+              <div class="stepper" data-k="adults" data-min="1" data-max="12"><button data-d="-1" aria-label="Moins">−</button><output></output><button data-d="1" aria-label="Plus">+</button></div>
+            </div>
+            <div class="stepper-row"><span>Enfants <small>2–11 ans</small></span>
+              <div class="stepper" data-k="children" data-min="0" data-max="8"><button data-d="-1" aria-label="Moins">−</button><output></output><button data-d="1" aria-label="Plus">+</button></div>
+            </div>
+          </div>
+
+          <div class="fgroup">
+            <h3>Standing</h3>
+            <div class="standings" id="standings"></div>
+            <label class="field"><span>Classe de vol</span><select id="f-cabin"></select></label>
+          </div>
+
+          <div class="fgroup">
+            <h3>Envies</h3>
+            <div class="chips" id="envies"></div>
+          </div>
+
+          <div class="fgroup">
+            <h3>Rythme</h3>
+            <div class="seg" id="rhythm">
+              <button data-v="tranquille">Tranquille</button><button data-v="equilibre">Équilibré</button><button data-v="intense">Intense</button>
+            </div>
+          </div>
+
+          <div class="fgroup">
+            <h3>Budget max <small>optionnel</small></h3>
+            <label class="field money-field"><input type="number" id="f-budget" min="0" step="100" placeholder="ex. 3000"><span>€ au total</span></label>
+          </div>
+
+          <button class="btn ghost small" id="newTrip">Nouveau voyage</button>
+        </aside>
+
+        <div class="results" id="results" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- INSPIRATION -->
+    <section class="view" id="view-inspi" hidden>
+      <div class="panel inspi-head">
+        <div>
+          <h2>Où partir ?</h2>
+          <p class="muted">Choisissez vos envies, la période et votre budget : je classe les destinations qui vous correspondent.</p>
+        </div>
+        <div class="inspi-controls">
+          <label class="field"><span>Mois de départ</span><select id="i-month"></select></label>
+          <label class="field"><span>Durée</span><select id="i-nights"></select></label>
+          <label class="field"><span>Budget / personne</span><input type="number" id="i-budget" min="0" step="100" placeholder="ex. 1500"></label>
+          <label class="field"><span>Standing</span><select id="i-standing"></select></label>
+          <label class="field"><span>Distance</span><select id="i-region">
+            <option value="all">Peu importe</option><option value="court">Moyen-courrier</option><option value="long">Long-courrier</option>
+          </select></label>
+        </div>
+        <div class="chips" id="i-envies"></div>
+      </div>
+      <div class="inspi-grid" id="inspiResults"></div>
+    </section>
+
+    <!-- MES VOYAGES -->
+    <section class="view" id="view-trips" hidden>
+      <div class="trips-head">
+        <div>
+          <h2>Mes voyages</h2>
+          <p class="muted">Enregistrés dans ce navigateur. Exportez-les pour les sauvegarder ou les passer sur un autre ordinateur.</p>
+        </div>
+        <div class="row-actions">
+          <button class="btn ghost" id="exportTrips">Exporter</button>
+          <label class="btn ghost">Importer<input type="file" id="importTrips" accept="application/json,.json" hidden></label>
+        </div>
+      </div>
+      <div class="trips-grid" id="tripsList"></div>
+    </section>
+  </main>
+
+  <dialog id="tripDialog"></dialog>
+  <div class="toast" id="toast" role="status"></div>
+  <button class="fab" id="toResults" hidden>Voir mon voyage ↓</button>
+
+  <script src="data.js?v=7"></script>
+  <script src="geo-reference.js?v=7"></script>
+  <script src="airports.js?v=7"></script>
+  <script src="js/text-format.js?v=7"></script>
+  <script src="js/calendar.js?v=7"></script>
+  <script src="js/budget-estimator.js?v=7"></script>
+  <script src="js/world-profile.js?v=7"></script>
+  <script src="js/listing-parser.js?v=7"></script>
+  <script src="js/place-insights.js?v=7"></script>
+  <script src="js/destination-resolver.js?v=7"></script>
+  <script src="js/budget-advisor.js?v=7"></script>
+  <script src="js/booking-links.js?v=7"></script>
+  <script src="js/itinerary-planner.js?v=7"></script>
+  <script src="js/trip-store.js?v=7"></script>
+  <script src="js/planner-form.js?v=7"></script>
+  <script src="js/place-search.js?v=7"></script>
+  <script src="js/planner-results.js?v=7"></script>
+  <script src="js/itinerary-view.js?v=7"></script>
+  <script src="js/inspiration-view.js?v=7"></script>
+  <script src="js/trips-view.js?v=7"></script>
+  <script src="js/app.js?v=7"></script>
+</body>
+</html>
